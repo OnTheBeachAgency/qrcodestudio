@@ -67,7 +67,6 @@ qrcode-studio/
 │   ├── qrcode.min.js         # Bundled QR generation library
 │   ├── jszip.min.js          # Bundled ZIP creation library
 │   └── exemple-qrcodes.csv   # Sample batch import file
-└── .openai/hosting.json      # Static hosting configuration
 ```
 
 ## Privacy
