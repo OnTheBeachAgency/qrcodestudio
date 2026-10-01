@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#182945" />
+    <meta name="description" content="Créez, personnalisez et exportez vos QR codes, seul ou en série." />
+    <title>Studio QR Code — OnTheBeach.dev</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23182945'/%3E%3Cpath fill='%23ff6b70' d='M12 12h18v18H12zm5 5v8h8v-8zm22-5h13v13H39zm4 4v5h5v-5zM12 39h18v13H12zm5 5v4h8v-4zm22-5h5v5h-5zm8 0h5v13h-5zm-8 8h5v5h-5z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./qrcode.min.js" defer></script>
+    <script src="./jszip.min.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__brand">
+        <span class="brand-mark" aria-hidden="true"><img src="./otb-logo.png" alt="" /></span>
+        <div><p>OnTheBeach.dev</p><h1>Studio QR Code</h1></div>
+      </div>
+      <div class="topbar__meta"><span class="status-dot" aria-hidden="true"></span><span id="topStatus">Prêt à créer</span><span class="format-pill">PNG · SVG</span></div>
+    </header>
+
+    <main class="workspace">
+      <section class="editor" aria-label="Création de QR codes">
+        <div class="editor__heading">
+          <div><span class="step-label">01</span><h2>Choisir le mode de création</h2></div>
+          <p>Un QR code ou une série prête à exporter.</p>
+        </div>
+
+        <div class="mode-grid" role="radiogroup" aria-label="Mode de création">
+          <button class="mode-card is-active" type="button" role="radio" aria-checked="true" data-mode="single">
+            <span class="mode-icon" aria-hidden="true"><i></i><i></i><i></i></span><strong>Un QR code</strong><span>À partir d’un texte ou d’une URL.</span>
+          </button>
+          <button class="mode-card" type="button" role="radio" aria-checked="false" data-mode="batch">
+            <span class="mode-icon mode-icon--batch" aria-hidden="true"><i></i><i></i><i></i><i></i></span><strong>Import CSV</strong><span>Une série de QR codes en une fois.</span>
+          </button>
+        </div>
+
+        <div class="editor-section" id="singleSection">
+          <div class="editor__heading editor__heading--compact"><div><span class="step-label">02</span><h2>Saisir le contenu</h2></div></div>
+          <label class="field"><span>Texte ou URL</span><textarea id="singleText" rows="4" maxlength="1200" placeholder="https://exemple.com ou votre texte…">https://onthebeach.dev</textarea></label>
+          <p class="field-help">Le QR code se met à jour pendant la saisie.</p>
+        </div>
+
+        <div class="editor-section" id="batchSection" hidden>
+          <div class="editor__heading editor__heading--compact"><div><span class="step-label">02</span><h2>Importer le fichier</h2></div></div>
+          <label class="upload-zone" for="csvFile">
+            <input id="csvFile" type="file" accept=".csv,text/csv" />
+            <span class="upload-icon" aria-hidden="true">↑</span>
+            <strong>Déposer un CSV ou choisir un fichier</strong>
+            <span>Encodage UTF-8 · séparateur virgule ou point-virgule</span>
+          </label>
+          <div class="csv-rule">
+            <strong>Format attendu</strong>
+            <code>text</code><span>pour un nom automatique, ou</span><code>name,text</code><span>pour définir vos noms de fichier.</span>
+          </div>
+          <a class="sample-csv" href="./exemple-qrcodes.csv" download>↓ Télécharger un fichier CSV d’exemple</a>
+          <div id="csvFeedback" class="csv-feedback" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="editor-section">
+          <div class="editor__heading editor__heading--compact"><div><span class="step-label">03</span><h2>Personnaliser l’apparence</h2></div></div>
+          <div class="style-grid">
+            <label class="field"><span>Couleurs du QR code</span><select id="colorMode"><option value="uniform">Couleur uniforme</option><option value="gradient">Dégradé à deux couleurs</option></select></label>
+            <label class="field"><span>Couleur principale</span><span class="color-control"><input id="foreground" type="color" value="#000000" /><output id="foregroundValue">#000000</output></span></label>
+            <div id="gradientControls" class="gradient-controls" hidden>
+              <label class="field"><span>Seconde couleur</span><span class="color-control"><input id="gradientEnd" type="color" value="#FF6B70" /><output id="gradientEndValue">#FF6B70</output></span></label>
+              <label class="field"><span>Angle du dégradé <output id="gradientAngleValue">45°</output></span><input id="gradientAngle" class="range-input" type="range" min="0" max="360" step="5" value="45" /></label>
+            </div>
+            <label class="field"><span>Fond</span><span class="color-control"><input id="background" type="color" value="#ffffff" /><output id="backgroundValue">#FFFFFF</output></span></label>
+            <label class="field field--check"><span>Fond transparent</span><span class="switch-row"><input id="transparent" type="checkbox" role="switch" /><span>Activé</span></span></label>
+            <label class="field"><span>Forme des modules</span><select id="shape"><option value="square">Carrés</option><option value="rounded">Arrondis</option><option value="dots">Points</option></select></label>
+            <div class="logo-field">
+              <span>Logo central <em>optionnel</em></span>
+              <div class="logo-actions">
+                <label class="logo-upload" for="logoFile">
+                  <input id="logoFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" aria-label="Ajouter un logo central" />
+                  <span class="logo-upload__icon" aria-hidden="true">+</span>
+                  <span><strong id="logoLabel">Ajouter un logo</strong><small>PNG, JPG, WebP ou SVG · 120 × 120 px</small></span>
+                </label>
+                <button id="removeLogo" class="remove-logo" type="button" hidden>Retirer</button>
+              </div>
+              <p class="logo-help">Une zone claire protège le logo et maintient la lecture du QR code.</p>
+            </div>
+          </div>
+          <p id="contrastWarning" class="contrast-warning" hidden>Ces couleurs sont proches : le QR code peut devenir difficile à scanner.</p>
+        </div>
+
+        <div class="editor-section editor-section--export">
+          <div class="editor__heading editor__heading--compact"><div><span class="step-label">04</span><h2>Exporter</h2></div></div>
+          <div class="export-row">
+            <label class="field"><span>Format</span><select id="format"><option value="png">PNG</option><option value="svg">SVG</option></select></label>
+            <button id="downloadButton" class="button button--primary" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" /></svg><span id="downloadLabel">Télécharger le PNG</span></button>
+          </div>
+          <p id="exportHelp" class="field-help">Votre fichier sera téléchargé directement.</p>
+        </div>
+      </section>
+
+      <aside class="preview-panel" aria-label="Aperçu du QR code">
+        <div class="preview-toolbar"><div><span class="preview-kicker">Aperçu en direct</span><strong id="previewName">qr_code</strong></div><span id="previewCount" class="save-status">1 QR code</span></div>
+        <div class="canvas-shell"><div id="qrPreview" class="qr-preview" aria-label="Aperçu du QR code"></div></div>
+        <div id="batchBrowse" class="batch-browse" hidden><button id="previousQr" type="button" aria-label="QR code précédent">‹</button><span id="batchPosition">1 / 1</span><button id="nextQr" type="button" aria-label="QR code suivant">›</button></div>
+        <p id="previewNote" class="preview-note">Format de sortie : 1024 × 1024 px.</p>
+      </aside>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
